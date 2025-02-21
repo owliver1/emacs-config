@@ -1,0 +1,368 @@
+#+TITLE: Owliver's Emacs Config!
+#+AUTHOR: Pedro Oliveira (Owliver)
+#+PROPERTY: header-args:emacs-lisp :tangle init.el
+
+
+
+* General Settings
+** Some basic config!
+
+#+BEGIN_SRC emacs-lisp
+  ;; FIXMEEEEEEEE
+  (setq-default indent-tabs-mode nil) 
+  (setq-default tab-width 2)
+  ;; (setq-default tab-always-indent 'complete)
+  (setq-default cursor-type 'bar) 
+  (setq
+   default-directory "~/.config/emacs/"
+   ;; Yes, this is Emacs
+   inhibit-startup-message t
+
+   ;; Instruct auto-save-mode to save to the current file, not a backup file
+   auto-save-default nil
+
+   ;; No backup files, please
+   make-backup-files nil
+
+   ;; Make it easy to cycle through previous items in the mark ring
+   set-mark-command-repeat-pop t
+
+   ;; Don't warn on large files
+   large-file-warning-threshold nil
+
+   ;; Follow symlinks to VC-controlled files without warning
+   vc-follow-symlinks t
+
+   ;; Don't warn on advice
+   ad-redefinition-action 'accept
+
+   ;; Revert Dired and other buffers
+   global-auto-revert-non-file-buffers t
+
+   ;; Silence compiler warnings as they can be pretty disruptive.
+   native-comp-async-report-warnings-errors nil)
+#+END_SRC
+
+** Remove UI features
+#+BEGIN_SRC emacs-lisp
+  (electric-pair-mode 1)
+  (whitespace-mode -1)
+  (menu-bar-mode 0)      
+  (tool-bar-mode 0)           
+  (savehist-mode 1)              
+  (scroll-bar-mode 0)            
+  (xterm-mouse-mode 1)
+  (global-visual-line-mode 1)
+  (global-display-line-numbers-mode t)
+  (add-hook 'dashboard-mode-hook
+          (lambda ()
+            (setq display-line-numbers nil))) 
+#+END_SRC
+
+** Font configuration
+#+BEGIN_SRC emacs-lisp
+  ;; Set Fira Code Nerd Font with size 16
+  (when (display-graphic-p)
+    (set-face-attribute 'default nil :font "FiraCode Nerd Font-16"))
+#+END_SRC
+
+** Eshell
+Set up a bull banner message!
+  (setq eshell-banner-message
+        (propertize
+         (concat
+          "Welcome to Eshell!\n\n"
+          "    __.------~~~-.         \n"
+          "  ,'/             `\       \n"
+          " \" \\  ,..__ | ,_   `\\_,   \n"
+          "     >/|/   ~~\\||`\\(`~,~'  \n"
+          "     | `\\     /'|   \\_;    \n"
+          "     \"  \"    \"             \n\n")
+         'face '(:foreground "light blue")))
+         
+* Packages and their Configurations
+** MELPA Installation and Config.
+#+BEGIN_SRC emacs-lisp
+	(require 'package)
+
+	(setq package-archives '(("melpa" . "https://melpa.org/packages/")
+													 ("org"   . "https://orgmode.org/elpa/")
+													 ("gnu"   . "https://elpa.gnu.org/packages/")))
+
+	(package-initialize)
+
+	(unless (package-installed-p 'use-package)
+		(package-refresh-contents)
+		(package-install 'use-package))
+
+	(require 'use-package)
+
+	(setq use-package-always-ensure t)
+#+END_SRC
+
+** LSP mode enabled!
+#+BEGIN_SRC emacs-lisp
+  (use-package lsp-mode
+    :ensure t
+    :hook ((python-mode . lsp)
+	   (c-mode . lsp)
+	   (c++-mode . lsp))
+    :commands lsp
+    :config
+    (setq lsp-enable-snippet t)
+    (setq lsp-prefer-flymake nil))
+#+END_SRC
+
+** LSP UI
+#+BEGIN_SRC emacs-lisp
+  (use-package lsp-ui
+    :ensure t
+    :after lsp-mode
+    :config
+    (setq lsp-ui-doc-enable t)     
+    (setq lsp-ui-sideline-enable t)
+    (setq lsp-ui-peek-enable t)    
+    (setq lsp-ui-imenu-enable t)   
+    (setq lsp-ui-flycheck-enable t))
+#+END_SRC
+
+** Give me some company
+#+BEGIN_SRC emacs-lisp
+  (use-package company
+  :ensure t
+  :config
+  (global-company-mode 1)      
+  (setq company-minimum-prefix-length 2))
+#+END_SRC
+
+** Magit is Magic
+#+BEGIN_SRC emacs-lisp
+  (use-package magit
+  :ensure t)
+#+END_SRC
+
+** Greet me please!
+#+BEGIN_SRC emacs-lisp
+  (use-package dashboard
+    :ensure t
+    :init
+    (setq dashboard-startup-banner 'logo)
+    (setq dashboard-center-content t)
+    (setq dashboard-vertically-center-content t)
+    (setq dashboard-footer-messages
+          '("i showed you my source code pls respond"
+            "i love this operating system!"))
+    (dashboard-setup-startup-hook))
+  (setq initial-buffer-choice (lambda () (get-buffer-create
+                                          dashboard-buffer-name)))
+#+END_SRC
+
+** You got mail!
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'load-path "/usr/share/emacs/site-lisp/mu4e")
+  (require 'mu4e)
+
+  (setq mu4e-maildir "~/email/mbsyncmail")
+
+  (setq mu4e-drafts-folder "/Drafts")
+  (setq mu4e-sent-folder   "/Sent")
+  (setq mu4e-trash-folder  "/Trash")
+
+  (setq mu4e-get-mail-command "mbsync tecnico")
+  (setq mu4e-update-interval 300) ;; Auto-refresh every 5 minutes
+  (setq mu4e-change-filenames-when-moving t)
+  ;; User details
+  (setq user-mail-address "ist1114085@tecnico.ulisboa.pt"
+        user-full-name "Pedro Oliveira")
+
+  ;; Set mu4e as the default email app
+  (setq mail-user-agent 'mu4e-user-agent)
+
+  ;; Don't keep message buffers around
+  (setq message-kill-buffer-on-exit t)
+
+  ;; Show images in emails
+  (setq mu4e-view-show-images t)
+  (setq mu4e-view-prefer-html t)
+
+  ;; Better handling of GPG-encrypted emails
+  (setq mu4e-decryption-policy 'ask) ;; Ask before decrypting emails
+#+END_SRC
+
+** RSS Reader
+#+BEGIN_SRC emacs-lisp
+  (use-package elfeed
+    :ensure t
+    :config
+    (setq elfeed-feeds
+          '("https://news.ycombinator.com/rss"  ; example RSS feed
+            "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml")))
+
+  (use-package elfeed-goodies
+    :ensure t
+    :config
+    (elfeed-goodies/setup))
+
+  ;; Somewhere in your .emacs file
+  (setq elfeed-feeds
+        '("https://feeds.bbci.co.uk/news/world/rss.xml"
+          "https://www.nature.com/rss/news_and_views/"
+          "https://www.ft.com/?format=rss"
+          "https://news.ycombinator.com/rss"
+          "https://www.cprogramming.com/feed.xml"
+          "https://www.linux.com/feed/"))
+  (setq elfeed-default-feed-handler 'elfeed-eww)
+  (setq browse-url-browser-function 'eww-browse-url)
+
+#+END_SRC
+** FIX MEEEEEEEEEEEE
+#+BEGIN_SRC emacs-lisp
+  (require 'fixmee)
+  (require 'button-lock)
+
+  (global-fixmee-mode 1)
+
+  ;; right-click on the word "fixme" in a comment
+
+  ;; for next-error support:
+  ;;
+  ;; M-x fixmee-view-listing RET
+#+END_SRC
+** Catppuccin Theme
+#+BEGIN_SRC emacs-lisp
+  (use-package catppuccin-theme
+    :ensure t)
+  (load-theme 'catppuccin :no-confirm)
+#+END_SRC
+
+* Functions
+** Reload Config function
+#+BEGIN_SRC emacs-lisp
+  (defun reload-config ()
+    (interactive)
+    (load-file (expand-file-name "~/.config/emacs/init.el")))
+#+END_SRC
+** Org mode functions
+*** Enter new Elisp source code
+#+BEGIN_SRC emacs-lisp
+  (defun enter-new-elisp-org-source ()
+    (interactive)
+    (insert "#+BEGIN_SRC emacs-lisp\n\n#+END_SRC")
+    (forward-line -1))
+#+END_SRC
+*** Replace Elisp source code visually
+#+BEGIN_SRC emacs-lisp
+  (defun org-mode-prettify-symbols ()
+    "Enable prettify symbols for Org mode."
+    (setq prettify-symbols-alist
+	  (append prettify-symbols-alist
+		  '(("#+BEGIN_SRC" . 955)  
+		    ("#+END_SRC" . 955))))           
+    (prettify-symbols-mode 1))
+#+END_SRC
+** Compile file C-mode
+#+BEGIN_SRC emacs-lisp
+  (defun my-c-compile-on-save ()
+    (when (eq major-mode 'c-mode)
+      (start-process "c-compile" "*c-compile-output*"
+                     "gcc" "-o" (file-name-sans-extension buffer-file-name) buffer-file-name)))
+  (add-hook 'after-save-hook #'my-c-compile-on-save)
+#+END_SRC
+** Function to change themes!
+#+BEGIN_SRC emacs-lisp
+    (defun catppuccin-change-theme ()
+    "Interactively change the Catppuccin theme flavor.
+  Prompts for one of the valid options: frappe, mocha, macchiato, or latte."
+    (interactive)
+    (let ((flavor (intern (completing-read
+                           "Enter your desired drink (frappe, mocha, macchiato, latte): "
+                           '("frappe" "mocha" "macchiato" "latte")
+                           nil t))))
+      (setq catppuccin-flavor flavor)
+      (catppuccin-reload)
+      flavor))
+#+END_SRC
+
+* Keybinds
+** For reloading config
+#+BEGIN_SRC emacs-lisp
+  (global-set-key (kbd "C-c e r") 'reload-config)
+#+END_SRC
+
+** Insert new elisp source
+#+BEGIN_SRC emacs-lisp
+  (global-set-key (kbd "C-c i s") 'enter-new-elisp-org-source)
+#+END_SRC
+
+** Goto what?
+#+BEGIN_SRC emacs-lisp
+  (global-set-key (kbd "s-<0x10081247>") 'goto-line)
+#+END_SRC
+
+** Copy, Paste, Cut
+#+BEGIN_SRC emacs-lisp
+  (global-set-key (kbd "C-S-c") 'copy-region-as-kill)
+  (global-set-key (kbd "C-S-v") 'yank)
+  (global-set-key (kbd "C-S-x") 'kill-region)
+#+END_SRC
+
+** Change Theme
+#+BEGIN_SRC emacs-lisp
+  (global-set-key (kbd "C-c c c t") 'catppuccin-change-theme)
+#+END_SRC
+* Org
+** Basic Config
+#+BEGIN_SRC emacs-lisp
+  (setq org-startup-indented t)       
+  (setq org-hide-emphasis-markers t) 
+  (setq org-hide-leading-stars t)    
+  (add-hook 'org-mode-hook 'org-mode-prettify-symbols)
+#+END_SRC
+
+** Agenda
+#+BEGIN_SRC emacs-lisp
+  (setq org-agenda-files (list "~/Documents/Org/agenda.org" "~/Documents/Org/projects.org"))
+#+END_SRC
+
+** Config QoL
+#+BEGIN_SRC emacs-lisp
+  (when (eq major-mode 'org-mode)
+    (add-hook 'after-save-hook 'org-babel-tangle))
+#+END_SRC
+
+* Extra Customization
+** Mode Line
+#+BEGIN_SRC emacs-lisp
+  (setq display-time-format "%H:%M")
+  (setq display-time-default-load-average nil)
+  (display-time-mode 1)  ;; Enable dynamic time updates
+
+  (setq-default mode-line-format
+                '(" %b    "  ;; Buffer name with icon
+                  "Currently using "
+                  mode-name
+                  " Mode!"
+
+                  ;; Dynamic spacing for right alignment
+                  (:eval
+                   (propertize " "
+                               'display `((space :align-to (- right ,(+ 10
+                                                                        (string-width (or vc-mode ""))
+                                                                        (string-width display-time-string)))))))
+
+                  ;; Dynamically updating Git branch
+                  (:eval (when vc-mode
+                           (propertize (substring vc-mode 5) 'face 'font-lock-keyword-face)))
+
+                  "  󰥔 "  ;; Separator
+
+                  ;; Right-aligned dynamic time
+                  display-time-string))
+
+  (let ((mode-line-bg (face-attribute 'mode-line :background nil t)))  ;; Get mode-line background
+  (set-face-attribute 'mode-line nil
+                      :box `(:line-width 8 :color ,mode-line-bg))  ;; Apply it to mode-line box
+  (set-face-attribute 'mode-line-inactive nil
+                      :box `(:line-width 8 :color ,mode-line-bg)
+                      :background mode-line-bg))  ;; Ensure inactive mode-line box also uses the background color
+#+END_SRC
