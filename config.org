@@ -2,8 +2,6 @@
 #+AUTHOR: Pedro Oliveira (Owliver)
 #+PROPERTY: header-args:emacs-lisp :tangle init.el
 
-
-
 * General Settings
 ** Some basic config!
 
@@ -65,20 +63,6 @@
   (when (display-graphic-p)
     (set-face-attribute 'default nil :font "FiraCode Nerd Font-16"))
 #+END_SRC
-
-** Eshell
-Set up a bull banner message!
-  (setq eshell-banner-message
-        (propertize
-         (concat
-          "Welcome to Eshell!\n\n"
-          "    __.------~~~-.         \n"
-          "  ,'/             `\       \n"
-          " \" \\  ,..__ | ,_   `\\_,   \n"
-          "     >/|/   ~~\\||`\\(`~,~'  \n"
-          "     | `\\     /'|   \\_;    \n"
-          "     \"  \"    \"             \n\n")
-         'face '(:foreground "light blue")))
          
 * Packages and their Configurations
 ** MELPA Installation and Config.
@@ -214,19 +198,6 @@ Set up a bull banner message!
   (setq elfeed-default-feed-handler 'elfeed-eww)
   (setq browse-url-browser-function 'eww-browse-url)
 
-#+END_SRC
-** FIX MEEEEEEEEEEEE
-#+BEGIN_SRC emacs-lisp
-  (require 'fixmee)
-  (require 'button-lock)
-
-  (global-fixmee-mode 1)
-
-  ;; right-click on the word "fixme" in a comment
-
-  ;; for next-error support:
-  ;;
-  ;; M-x fixmee-view-listing RET
 #+END_SRC
 ** Catppuccin Theme
 #+BEGIN_SRC emacs-lisp
