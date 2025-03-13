@@ -2,88 +2,57 @@
 #+AUTHOR: Pedro Oliveira (Owliver)
 #+PROPERTY: header-args:emacs-lisp :tangle init.el
 
-* General Settings
-** Some basic config!
-
+* Settings
+** Set up some essential variables
 #+BEGIN_SRC emacs-lisp
-  ;; FIXMEEEEEEEE
   (setq-default indent-tabs-mode nil) 
   (setq-default tab-width 2)
-  ;; (setq-default tab-always-indent 'complete)
   (setq-default cursor-type 'bar) 
-  (setq
-   default-directory "~/.config/emacs/"
-   ;; Yes, this is Emacs
-   inhibit-startup-message t
-
-   ;; Instruct auto-save-mode to save to the current file, not a backup file
-   auto-save-default nil
-
-   ;; No backup files, please
-   make-backup-files nil
-
-   ;; Make it easy to cycle through previous items in the mark ring
-   set-mark-command-repeat-pop t
-
-   ;; Don't warn on large files
-   large-file-warning-threshold nil
-
-   ;; Follow symlinks to VC-controlled files without warning
-   vc-follow-symlinks t
-
-   ;; Don't warn on advice
-   ad-redefinition-action 'accept
-
-   ;; Revert Dired and other buffers
-   global-auto-revert-non-file-buffers t
-
-   ;; Silence compiler warnings as they can be pretty disruptive.
-   native-comp-async-report-warnings-errors nil)
+  (setq inhibit-startup-message t
+        history-length 25
+        use-dialog-box nil
+        make-backup-files nil
+        auto-save-default nil)
 #+END_SRC
-
-** Remove UI features
+** Erase default minor modes.
 #+BEGIN_SRC emacs-lisp
+  (menu-bar-mode -1)
+  (tool-bar-mode -1)
+  (scroll-bar-mode -1)
+#+END_SRC
+** Set up minor modes.
+#+BEGIN_SRC emacs-lisp
+  (global-display-line-numbers-mode 1)
+  (recentf-mode 1)
+  (savehist-mode 1)
+  (save-place-mode 1)
+  (global-auto-revert-mode 1)
   (electric-pair-mode 1)
-  (whitespace-mode -1)
-  (menu-bar-mode 0)      
-  (tool-bar-mode 0)           
-  (savehist-mode 1)              
-  (scroll-bar-mode 0)            
-  (xterm-mouse-mode 1)
   (global-visual-line-mode 1)
-  (global-display-line-numbers-mode t)
-  (add-hook 'dashboard-mode-hook
-          (lambda ()
-            (setq display-line-numbers nil))) 
 #+END_SRC
-
-** Font configuration
+** Starts fullscreen
 #+BEGIN_SRC emacs-lisp
-  ;; Set Fira Code Nerd Font with size 16
-  (when (display-graphic-p)
-    (set-face-attribute 'default nil :font "FiraCode Nerd Font-16"))
+  (add-to-list 'default-frame-alist '(fullscreen . fullboth))
 #+END_SRC
-         
-* Packages and their Configurations
+* Packages
 ** MELPA Installation and Config.
 #+BEGIN_SRC emacs-lisp
-	(require 'package)
+  (require 'package)
 
-	(setq package-archives '(("melpa" . "https://melpa.org/packages/")
-													 ("org"   . "https://orgmode.org/elpa/")
-													 ("gnu"   . "https://elpa.gnu.org/packages/")))
+  (setq package-archives '(("melpa" . "https://melpa.org/packages/")
+  												 ("org"   . "https://orgmode.org/elpa/")
+  												 ("gnu"   . "https://elpa.gnu.org/packages/")))
 
-	(package-initialize)
+  (package-initialize)
 
-	(unless (package-installed-p 'use-package)
-		(package-refresh-contents)
-		(package-install 'use-package))
+  (unless (package-installed-p 'use-package)
+  	(package-refresh-contents)
+  	(package-install 'use-package))
 
-	(require 'use-package)
+  (require 'use-package)
 
-	(setq use-package-always-ensure t)
+  (setq use-package-always-ensure t)
 #+END_SRC
-
 ** LSP mode enabled!
 #+BEGIN_SRC emacs-lisp
   (use-package lsp-mode
@@ -124,88 +93,44 @@
   (use-package magit
   :ensure t)
 #+END_SRC
-
-** Greet me please!
+** Snip snip snip...
 #+BEGIN_SRC emacs-lisp
-  (use-package dashboard
-    :ensure t
-    :init
-    (setq dashboard-startup-banner 'logo)
-    (setq dashboard-center-content t)
-    (setq dashboard-vertically-center-content t)
-    (setq dashboard-footer-messages
-          '("i showed you my source code pls respond"
-            "i love this operating system!"))
-    (dashboard-setup-startup-hook))
-  (setq initial-buffer-choice (lambda () (get-buffer-create
-                                          dashboard-buffer-name)))
+  (use-package yasnippet)
+  (yas-global-mode 1)
+  
 #+END_SRC
-
-** You got mail!
+** Mood Line
 #+BEGIN_SRC emacs-lisp
-  (add-to-list 'load-path "/usr/share/emacs/site-lisp/mu4e")
-  (require 'mu4e)
-
-  (setq mu4e-maildir "~/email/mbsyncmail")
-
-  (setq mu4e-drafts-folder "/Drafts")
-  (setq mu4e-sent-folder   "/Sent")
-  (setq mu4e-trash-folder  "/Trash")
-
-  (setq mu4e-get-mail-command "mbsync tecnico")
-  (setq mu4e-update-interval 300) ;; Auto-refresh every 5 minutes
-  (setq mu4e-change-filenames-when-moving t)
-  ;; User details
-  (setq user-mail-address "ist1114085@tecnico.ulisboa.pt"
-        user-full-name "Pedro Oliveira")
-
-  ;; Set mu4e as the default email app
-  (setq mail-user-agent 'mu4e-user-agent)
-
-  ;; Don't keep message buffers around
-  (setq message-kill-buffer-on-exit t)
-
-  ;; Show images in emails
-  (setq mu4e-view-show-images t)
-  (setq mu4e-view-prefer-html t)
-
-  ;; Better handling of GPG-encrypted emails
-  (setq mu4e-decryption-policy 'ask) ;; Ask before decrypting emails
-#+END_SRC
-
-** RSS Reader
-#+BEGIN_SRC emacs-lisp
-  (use-package elfeed
+  (use-package mood-line
     :ensure t
     :config
-    (setq elfeed-feeds
-          '("https://news.ycombinator.com/rss"  ; example RSS feed
-            "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml")))
-
-  (use-package elfeed-goodies
-    :ensure t
-    :config
-    (elfeed-goodies/setup))
-
-  ;; Somewhere in your .emacs file
-  (setq elfeed-feeds
-        '("https://feeds.bbci.co.uk/news/world/rss.xml"
-          "https://www.nature.com/rss/news_and_views/"
-          "https://www.ft.com/?format=rss"
-          "https://news.ycombinator.com/rss"
-          "https://www.cprogramming.com/feed.xml"
-          "https://www.linux.com/feed/"))
-  (setq elfeed-default-feed-handler 'elfeed-eww)
-  (setq browse-url-browser-function 'eww-browse-url)
-
+    (mood-line-mode))
 #+END_SRC
-** Catppuccin Theme
+** Org Superstar Installation
 #+BEGIN_SRC emacs-lisp
-  (use-package catppuccin-theme
+  (use-package org-superstar
+    :ensure t
+    :hook (org-mode . org-superstar-mode)
+    :config
+    (setq org-superstar-headline-bullets-list '(">" "◉" "○" "▶" "◆" "◉" "○" "▶" "◆")))
+#+END_SRC
+** Org Roam
+#+BEGIN_SRC emacs-lisp
+  (use-package org-roam
     :ensure t)
-  (load-theme 'catppuccin :no-confirm)
+  (use-package org-roam-ui
+    :ensure t)
 #+END_SRC
-
+** LaTeX
+#+BEGIN_SRC emacs-lisp
+  (use-package auctex
+    :ensure t)
+#+END_SRC
+** Theme
+#+BEGIN_SRC emacs-lisp
+  (use-package ef-themes
+    :ensure t)
+#+END_SRC
 * Functions
 ** Reload Config function
 #+BEGIN_SRC emacs-lisp
@@ -213,127 +138,215 @@
     (interactive)
     (load-file (expand-file-name "~/.config/emacs/init.el")))
 #+END_SRC
-** Org mode functions
-*** Enter new Elisp source code
+** Tangle when this file is saved
 #+BEGIN_SRC emacs-lisp
-  (defun enter-new-elisp-org-source ()
-    (interactive)
-    (insert "#+BEGIN_SRC emacs-lisp\n\n#+END_SRC")
-    (forward-line -1))
+  (defun owl/org-babel-tangle-config ()
+    (when (string-equal (buffer-file-name)
+                        (expand-file-name "~/.config/emacs/config.org"))
+      ;; Dynamic scoping to the rescue
+      (let ((org-confirm-babel-evaluate nil))
+        (org-babel-tangle)))
+    )
+  (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'owl/org-babel-tangle-config)))
 #+END_SRC
-*** Replace Elisp source code visually
+** Org Mode functions!
+*** Replace Org Mode Metadata with Icons visually
 #+BEGIN_SRC emacs-lisp
   (defun org-mode-prettify-symbols ()
     "Enable prettify symbols for Org mode."
     (setq prettify-symbols-alist
-	  (append prettify-symbols-alist
-		  '(("#+BEGIN_SRC" . 955)  
-		    ("#+END_SRC" . 955))))           
+  	(append prettify-symbols-alist
+  		'(("#+BEGIN_SRC" . 955)
+        ("+begin_src" . 955)
+        ("+end_src" . 955)
+  		  ("#+END_SRC" . 955)
+        ("#+title:" . ?✍)
+  		  ("#+TITLE:" . ?✍)
+        ("#+author:" . ?❀)
+  		  ("#+AUTHOR:" . ?❀)
+  		  ("#+PROPERTY:" . 955)
+        (":PROPERTIES:" . 955)
+        ("#+property:" . 955)
+        ("#+RESULTS:" . ""))
+      ))
     (prettify-symbols-mode 1))
 #+END_SRC
-** Compile file C-mode
+*** Insert Source Block
+**** Blank Source Block
 #+BEGIN_SRC emacs-lisp
-  (defun my-c-compile-on-save ()
-    (when (eq major-mode 'c-mode)
-      (start-process "c-compile" "*c-compile-output*"
-                     "gcc" "-o" (file-name-sans-extension buffer-file-name) buffer-file-name)))
-  (add-hook 'after-save-hook #'my-c-compile-on-save)
+  (defun enter-new-blank-org-source ()
+  (interactive)
+  (insert "#+BEGIN_SRC \n\n#+END_SRC")
+  (forward-line -1))
 #+END_SRC
-** Function to change themes!
+**** Elisp Source Block
 #+BEGIN_SRC emacs-lisp
-    (defun catppuccin-change-theme ()
-    "Interactively change the Catppuccin theme flavor.
-  Prompts for one of the valid options: frappe, mocha, macchiato, or latte."
-    (interactive)
-    (let ((flavor (intern (completing-read
-                           "Enter your desired drink (frappe, mocha, macchiato, latte): "
-                           '("frappe" "mocha" "macchiato" "latte")
-                           nil t))))
-      (setq catppuccin-flavor flavor)
-      (catppuccin-reload)
-      flavor))
+  (defun enter-new-elisp-org-source ()
+  (interactive)
+  (insert "#+BEGIN_SRC emacs-lisp\n\n#+END_SRC")
+  (forward-line -1))
 #+END_SRC
+**** C source block
+#+BEGIN_SRC emacs-lisp
+  (defun enter-new-c-org-source ()
+  (interactive)
+  (insert "#+BEGIN_SRC C :results output :includes\n\n#+END_SRC")
+  (forward-line -1))
+#+END_SRC
+*** Open the Zettlekasten
 
+#+BEGIN_SRC emacs-lisp
+  (defun open-org-roam-graph ()
+    (interactive)
+    (org-roam-ui-mode -1)
+    (org-roam-ui-mode 1)  
+    (browse-url "http://127.0.0.1:35901")) 
+#+END_SRC
+** Compile
+#+BEGIN_SRC emacs-lisp
+  (defun owl/compilation-exit (buffer status)
+  "Only show the compilation buffer if there were errors."
+  (if (string-match "finished" status)
+      (kill-buffer buffer)  ;; Hide the buffer if compilation succeeds
+    ))
+#+END_SRC
 * Keybinds
 ** For reloading config
 #+BEGIN_SRC emacs-lisp
   (global-set-key (kbd "C-c e r") 'reload-config)
 #+END_SRC
-
-** Insert new elisp source
+** Insert Source Blocks
+*** Blank Org Source
 #+BEGIN_SRC emacs-lisp
-  (global-set-key (kbd "C-c i s") 'enter-new-elisp-org-source)
+  (global-set-key (kbd "C-c i s b") 'enter-new-blank-org-source)
 #+END_SRC
-
+*** Emacs Lisp Org Source
+#+BEGIN_SRC emacs-lisp
+  (global-set-key (kbd "C-c i s e") 'enter-new-elisp-org-source)
+#+END_SRC
+*** C Org Source
+#+BEGIN_SRC emacs-lisp
+  (global-set-key (kbd "C-c i s c") 'enter-new-c-org-source)
+#+END_SRC
 ** Goto what?
 #+BEGIN_SRC emacs-lisp
   (global-set-key (kbd "s-<0x10081247>") 'goto-line)
 #+END_SRC
-
 ** Copy, Paste, Cut
 #+BEGIN_SRC emacs-lisp
   (global-set-key (kbd "C-S-c") 'copy-region-as-kill)
   (global-set-key (kbd "C-S-v") 'yank)
   (global-set-key (kbd "C-S-x") 'kill-region)
 #+END_SRC
-
-** Change Theme
+** Undo the redo
 #+BEGIN_SRC emacs-lisp
-  (global-set-key (kbd "C-c c c t") 'catppuccin-change-theme)
+  (global-set-key (kbd "C-z") 'undo-only)
+  (global-set-key (kbd "C-S-z") 'undo-redo)
 #+END_SRC
-* Org
+** Org Roam Binds
+#+BEGIN_SRC emacs-lisp
+  (global-set-key (kbd "C-c n i") #'org-roam-node-insert)
+  (global-set-key (kbd "C-c n f") #'org-roam-node-find)
+  (global-set-key (kbd "C-c n c") #'completion-at-point)
+  (global-set-key (kbd "C-c n g") 'open-org-roam-graph)
+#+END_SRC
+
+* Appearance
+** Font Configuration
+#+BEGIN_SRC emacs-lisp
+  (set-face-attribute 'default nil :font "Iosevka Nerd Font" :height 160)
+#+END_SRC
+** Theme
+#+BEGIN_SRC emacs-lisp
+  ;; (load-theme 'ef-summer t)
+  (load-theme 'ef-dream t)
+#+END_SRC
+** Eshell Config
+#+BEGIN_SRC emacs-lisp
+  (setq eshell-banner-message "")
+  (setq eshell-prompt-function
+      (lambda ()
+        (concat
+         (propertize (eshell/pwd) 'face 'font-lock-keyword-face)
+         (if (= (user-uid) 0)
+             (propertize " # " 'face 'font-lock-warning-face)
+           (propertize " λ " 'face 'font-lock-variable-name-face)))))
+  (add-hook 'eshell-mode-hook 'company-mode)
+#+END_SRC
+** Mood Line Config
+#+BEGIN_SRC emacs-lisp
+  (setq mood-line-glyph-alist mood-line-glyphs-fira-code)
+
+  (custom-set-faces
+   '(mode-line ((t (:height 1.1))))
+   '(mode-line-inactive ((t (:height 1.1)))))
+
+#+END_SRC
+* IDE
+** Compile
+#+BEGIN_SRC emacs-lisp
+(add-hook 'compilation-start-hook #'owl/compilation-exit)
+(setq compilation-scroll-output 'first-error) ;; Auto-scroll to first error
+(setq compilation-auto-jump-to-first-error t) ;; Jump to first error if any
+#+END_SRC
+
+* Org Mode
 ** Basic Config
 #+BEGIN_SRC emacs-lisp
-  (setq org-startup-indented t)       
-  (setq org-hide-emphasis-markers t) 
-  (setq org-hide-leading-stars t)    
+  (setq org-startup-indented t       
+        org-hide-emphasis-markers t 
+        org-hide-leading-stars t
+        org-ellipsis " ")
+  (custom-set-faces
+ '(org-level-1 ((t (:height 1.3 :weight bold))))
+ '(org-level-2 ((t (:height 1.2 :weight bold))))
+ '(org-level-3 ((t (:height 1.1 :weight bold))))
+ '(org-level-4 ((t (:height 1.1 :weight bold))))
+ '(org-level-5 ((t (:height 1.1 :weight bold))))
+ '(org-level-6 ((t (:height 1.1 :weight bold))))
+ '(org-level-7 ((t (:height 1.1 :weight bold))))
+ '(org-document-title ((t (:height 1.5 :weight bold))))
+ '(org-document-info ((t (:height 1.3 :weight bold :slant italic))))
+ '(org-meta-line ((t (:height 1.15 :slant italic))))
+ '(org-block-begin-line ((t (:slant italic)))))
+
+
   (add-hook 'org-mode-hook 'org-mode-prettify-symbols)
 #+END_SRC
-
-** Agenda
+** Org agenda
 #+BEGIN_SRC emacs-lisp
-  (setq org-agenda-files (list "~/Documents/Org/agenda.org" "~/Documents/Org/projects.org"))
+  (setq org-agenda-files '("~/Documents/Org/agenda.org" "~/Documents/Org/projects.org"))
 #+END_SRC
-
-** Config QoL
+** LaTeX support in Org Mode
 #+BEGIN_SRC emacs-lisp
-  (when (eq major-mode 'org-mode)
-    (add-hook 'after-save-hook 'org-babel-tangle))
+  (setq org-startup-with-latex-preview t)
+
+  (setq org-latex-default-packages-alist
+        '(("AUTO" "inputenc" t ("pdflatex"))
+          ("T1" "fontenc" t ("pdflatex"))
+          ("11pt" "article" nil ("pdflatex"))))
+  (setq org-export-with-LaTeX 't)  
+  (setq org-latex-listings 't) 
+  (setq org-latex-pdf-process '("latexmk -pdf -shell-escape %f")) 
 #+END_SRC
-
-* Extra Customization
-** Mode Line
+** Org Roam
+*** Basic Config
 #+BEGIN_SRC emacs-lisp
-  (setq display-time-format "%H:%M")
-  (setq display-time-default-load-average nil)
-  (display-time-mode 1)  ;; Enable dynamic time updates
-
-  (setq-default mode-line-format
-                '(" %b    "  ;; Buffer name with icon
-                  "Currently using "
-                  mode-name
-                  " Mode!"
-
-                  ;; Dynamic spacing for right alignment
-                  (:eval
-                   (propertize " "
-                               'display `((space :align-to (- right ,(+ 10
-                                                                        (string-width (or vc-mode ""))
-                                                                        (string-width display-time-string)))))))
-
-                  ;; Dynamically updating Git branch
-                  (:eval (when vc-mode
-                           (propertize (substring vc-mode 5) 'face 'font-lock-keyword-face)))
-
-                  "  󰥔 "  ;; Separator
-
-                  ;; Right-aligned dynamic time
-                  display-time-string))
-
-  (let ((mode-line-bg (face-attribute 'mode-line :background nil t)))  ;; Get mode-line background
-  (set-face-attribute 'mode-line nil
-                      :box `(:line-width 8 :color ,mode-line-bg))  ;; Apply it to mode-line box
-  (set-face-attribute 'mode-line-inactive nil
-                      :box `(:line-width 8 :color ,mode-line-bg)
-                      :background mode-line-bg))  ;; Ensure inactive mode-line box also uses the background color
+  (setq org-roam-directory "~/Documents/Org/Notes/")
+  (setq org-roam-db-update-on-save t)
+  (setq org-roam-completion-everywhere t)
+  (org-roam-db-autosync-mode)
+#+END_SRC
+*** Org Roam UI
+#+BEGIN_SRC emacs-lisp
+  (setq org-roam-ui-sync-theme t
+        org-roam-ui-follow t
+        org-roam-ui-update-on-save t
+        org-roam-ui-open-on-start nil)
+#+END_SRC
+** Add Org Babel Code Execution
+#+BEGIN_SRC emacs-lisp
+  (org-babel-do-load-languages
+  'org-babel-load-languages
+  '((C . t)))
 #+END_SRC
