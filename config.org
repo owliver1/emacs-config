@@ -347,7 +347,13 @@
           ("11pt" "article" nil ("pdflatex"))))
   (setq org-export-with-LaTeX 't)  
   (setq org-latex-listings 't) 
-  (setq org-latex-pdf-process '("latexmk -pdf -shell-escape %f")) 
+  (setq org-latex-pdf-process '("latexmk -pdf -shell-escape %f"))
+  (setq org-preview-latex-default-process 'dvisvgm)
+
+  (setq org-format-latex-options
+      '(:foreground default :background default :scale 0.8 :html-foreground "Black"
+        :html-background "Transparent" :html-scale 1.0 :matchers ("begin" "$1" "$" "$$" "\\(" "\\[")))
+
 #+END_SRC
 ** Org Roam
 *** Basic Config
